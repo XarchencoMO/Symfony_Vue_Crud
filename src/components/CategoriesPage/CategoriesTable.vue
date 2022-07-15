@@ -1,7 +1,7 @@
 <template>
   <v-data-table
       :headers="headers"
-      :items="products"
+      :items="categories"
       sort-by="id"
       elevation="1"
   >
@@ -9,7 +9,7 @@
       <v-toolbar
           flat
       >
-        <v-toolbar-title>Products Crud Controller</v-toolbar-title>
+        <v-toolbar-title>Categories Crud Controller</v-toolbar-title>
         <v-divider
             class="mx-4"
             inset
@@ -31,7 +31,7 @@
               New Item
             </v-btn>
           </template>
-<!--      Create/edit card-->
+          <!--      Create/edit card-->
           <v-card>
             <v-card-title>
               <span class="text-h5">{{ formTitle }}</span>
@@ -40,7 +40,6 @@
             <v-card-text>
               <v-container>
                 <v-row>
-
                   <v-col
                       cols="12"
                       sm="12"
@@ -48,38 +47,8 @@
                   >
                     <v-text-field
                         v-model="editedItem.name"
-                        label="Product name"
+                        label="Category name"
                     ></v-text-field>
-                  </v-col>
-                  <v-col
-                      cols="12"
-                      sm="12"
-                      md="12"
-                  >
-<!--                    <v-text-field-->
-<!--                    ></v-text-field>-->
-                    <v-select
-                        v-model="editedItem.categories"
-                        :items="states"
-                        item-text="name"
-                        item-key="id"
-                        item-value="id"
-                        label="Categories"
-                        multiple
-                        chips
-                        hint="select categories"
-                        persistent-hint
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                      cols="12"
-                      sm="12"
-                      md="12"
-                  >
-                    <v-textarea
-                        v-model="editedItem.description"
-                        label="Description"
-                    ></v-textarea>
                   </v-col>
                 </v-row>
               </v-container>
@@ -104,7 +73,7 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-<!--      Delete dialog-->
+        <!--      Delete dialog-->
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
             <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
@@ -118,10 +87,7 @@
         </v-dialog>
       </v-toolbar>
     </template>
-    <template v-slot:item.categories="props">
-      <span v-for="category in props.item.categories">{{ category.name }} </span>
-    </template>
-<!--    Actions in table-->
+    <!--    Actions in table-->
     <template v-slot:item.actions="{ item }">
       <v-icon
           small
@@ -137,7 +103,7 @@
         mdi-delete
       </v-icon>
     </template>
-<!--    Empty table-->
+    <!--    Empty table-->
     <template v-slot:no-data>
       <v-btn
           color="primary"
@@ -154,35 +120,28 @@ import axios from "axios";
 
 export default {
   data: () => ({
-    url_products: "http://localhost:8000/api/products",
     url_categories: "http://localhost:8000/api/categories",
     dialog: false,
     dialogDelete: false,
     headers: [
-      // { text: 'id', align: 'start', value: 'id',},
-      { text: 'Product Name', value: 'name' },
-      { text: 'Categories', value: 'categories'},
-      { text: 'Description', value: 'description' },
+      {
+        text: 'id',
+        align: 'start',
+        value: 'id',
+      },
+      { text: 'Category Name', value: 'name' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
-    products: [],
+    categories: [],
     editedIndex: -1,
     editedItem: {
       id: '',
-      name: '',
-      categories: [],
-      description: '',
+      name: ''
     },
     defaultItem: {
       id: '',
       name: '',
-      categories: [],
-      description: '',
     },
-    category: {
-      name: '',
-    },
-    states: [],
   }),
 
   computed: {
@@ -201,36 +160,32 @@ export default {
   },
 
   async created () {
-    const products_response = await axios.get(this.url_products)
     const categories_response = await axios.get(this.url_categories)
-    // console.log(products_response, categories_response)
-    this.initialize(products_response.data,categories_response.data)
+    this.initialize(categories_response.data)
   },
 
   methods: {
-    initialize (data_products,data_categories) {
-      this.products = data_products;
-      this.states = data_categories;
+    initialize (data_categories) {
+      this.categories = data_categories;
       // this.states = data_categories.flatMap(({ name }) => name );
-      console.log(this.products, this.states)
     },
 
     editItem (item) {
-      this.editedIndex = this.products.indexOf(item)
+      this.editedIndex = this.categories.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
 
     deleteItem (item) {
 
-      this.editedIndex = this.products.indexOf(item)
+      this.editedIndex = this.categories.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogDelete = true
     },
 
     deleteItemConfirm () {
-      const response = axios.delete(this.url_products+'/'+this.editedItem.id)
-      this.products.splice(this.editedIndex, 1)
+      const response = axios.delete(this.url_categories+'/'+this.editedItem.id)
+      this.categories.splice(this.editedIndex, 1)
       this.closeDelete()
     },
 
@@ -250,25 +205,15 @@ export default {
       })
     },
 
-    async save() {
+    async save () {
       if (this.editedIndex > -1) {
-        const response = await axios.put(this.url_products + '/' + this.editedItem.id, {
-          name: this.editedItem.name,
-          categories: this.editedItem.categories,
-          description: this.editedItem.description
-        })
-        // console.log(this.editedItem)
-        // TODO: Не добавляются категории (нужен алгоритм по добавлению из states в editedItem)
-        Object.assign(this.products[this.editedIndex], this.editedItem)
-      } else {
-        // console.log(this.editedItem)
-        const response = await axios.post(this.url_products, JSON.stringify({
-          name: this.editedItem.name,
-          categories: this.editedItem.categories,
-          description: this.editedItem.description
-        }))
+        const response = await axios.put(this.url_categories+'/'+this.editedItem.id, {name: this.editedItem.name, categories: this.editedItem.categories ,description: this.editedItem.description})
 
-        this.products.push(this.editedItem)
+        Object.assign(this.categories[this.editedIndex], this.editedItem)
+      } else {
+        // console.log(this.editedItem.categories)
+        const response = await axios.post(this.url_categories, {name: this.editedItem.name, categories: this.editedItem.categories , description: this.editedItem.description})
+        this.categories.push(this.editedItem)
       }
       this.close()
     },
