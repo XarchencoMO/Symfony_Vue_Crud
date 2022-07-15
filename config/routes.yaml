@@ -1,3 +1,38 @@
-#index:
-#    path: /
-#    controller: App\test
+#
+#  Routes for products
+#
+get_products:
+    path: /api/products
+    controller: App\Controller\ProductCrudController::index
+    methods: GET
+add_product:
+    path: /api/products
+    controller: App\Controller\ProductCrudController::addEntity
+    methods: POST
+update_product:
+    path: /api/products/{id}
+    controller: App\Controller\ProductCrudController::updateEntity
+    methods: PUT
+delete_product:
+    path: /api/products/{id}
+    controller: App\Controller\ProductCrudController::deleteEntity
+    methods: DELETE
+#
+#  Routes for categories
+#
+get_categories:
+    path: /api/categories
+    controller: App\Controller\CategoryCrudController::index
+    methods: GET
+add_category:
+    path: /api/categories
+    controller: App\Controller\CategoryCrudController::addEntity
+    methods: POST
+update_category:
+    path: /api/categories/{id}
+    controller: App\Controller\CategoryCrudController::updateEntity
+    methods: PUT
+delete_category:
+    path: /api/categories/{id}
+    controller: App\Controller\CategoryCrudController::deleteEntity
+    methods: DELETE

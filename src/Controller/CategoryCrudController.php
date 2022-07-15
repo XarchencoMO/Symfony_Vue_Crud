@@ -27,45 +27,4 @@ class CategoryCrudController extends AbstractCrudController
         return CategoryType::class;
     }
 
-    /**
-     * @return JsonResponse
-     * @Route("/categories", name="categories", methods={"GET"})
-     */
-    public function index(): JsonResponse
-    {
-        return parent::index();
-    }
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @Route("/categories", name="categories_add", methods={"POST"})
-     */
-    public function addEntity(Request $request): JsonResponse
-    {
-        return parent::addEntity($request);
-    }
-
-    /**
-     * @param Request $request
-     * @param $id
-     * @return JsonResponse
-     * @Route("/categories/{id}", name="categories_put", methods={"PUT"})
-     */
-    public function updateEntity(Request $request, $id): JsonResponse
-    {
-        return parent::updateEntity($request, $id);
-    }
-
-    /**
-     * @param $id
-     * @return JsonResponse
-     * @Route("/categories/{id}", name="categories_delete", methods={"DELETE"})
-     */
-    public function deleteEntity($id): JsonResponse
-    {
-        return parent::deleteEntity($id);
-    }
-
-
 }
