@@ -6,26 +6,32 @@ use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=CategoryRepository::class)
  */
 class Category
 {
+//    const FILM = 0;
+//    const CODE = 1;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+//     * @Groups({"product_list:read", "category_list:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+//     * @Groups({"product_list:read", "category_list:read"})
      */
     private $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Product::class, inversedBy="categories")
+     * @ORM\ManyToMany(targetEntity=Product::class, mappedBy="categories")
      */
     private $products;
 
@@ -73,5 +79,17 @@ class Category
         $this->products->removeElement($product);
 
         return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            "name" => $this->getName(),
+        ];
+    }
+
+    public function __toString()
+    {
+        return $this->getId().' '.$this->getName();
     }
 }
