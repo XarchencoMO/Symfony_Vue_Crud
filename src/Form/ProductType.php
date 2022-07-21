@@ -24,7 +24,7 @@ class ProductType extends AbstractType
             ])
             ->add('categories', EntityType::class, [
                 'class'     => Category::class,
-//                'expanded'  => true,
+                'expanded'  => true,
                 'multiple'  => true,
             ])
             ->add('description', TextType::class, [
