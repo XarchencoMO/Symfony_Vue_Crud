@@ -62,13 +62,12 @@
                         v-model="editedItem.categories"
                         :items="states"
                         item-text="name"
-                        item-key="id"
-                        item-value="id"
                         label="Categories"
                         multiple
                         chips
                         hint="select categories"
                         persistent-hint
+                        return-object
                     ></v-select>
                   </v-col>
                   <v-col
@@ -251,23 +250,16 @@ export default {
     },
 
     async save() {
+      const requestData = {
+        name: this.editedItem.name,
+        categories: this.editedItem.categories.flatMap(({ id }) => id ),
+        description: this.editedItem.description
+      }
       if (this.editedIndex > -1) {
-        const response = await axios.put(this.url_products + '/' + this.editedItem.id, {
-          name: this.editedItem.name,
-          categories: this.editedItem.categories,
-          description: this.editedItem.description
-        })
-        // console.log(this.editedItem)
-        // TODO: Не добавляются категории (нужен алгоритм по добавлению из states в editedItem)
+        const response = await axios.put(this.url_products + '/' + this.editedItem.id, requestData)
         Object.assign(this.products[this.editedIndex], this.editedItem)
       } else {
-        // console.log(this.editedItem)
-        const response = await axios.post(this.url_products, JSON.stringify({
-          name: this.editedItem.name,
-          categories: this.editedItem.categories,
-          description: this.editedItem.description
-        }))
-
+        const response = await axios.post(this.url_products, requestData)
         this.products.push(this.editedItem)
       }
       this.close()
