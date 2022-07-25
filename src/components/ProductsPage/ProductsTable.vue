@@ -31,79 +31,84 @@
               New Item
             </v-btn>
           </template>
-<!--      Create/edit card-->
-          <v-card>
-            <v-card-title>
-              <span class="text-h5">{{ formTitle }}</span>
-            </v-card-title>
+          <!--      Create/edit card-->
+          <v-form
+              ref="form"
+              v-model="valid"
+              lazy-validation
+          >
+            <v-card>
+              <v-card-title>
+                <span class="text-h5">{{ formTitle }}</span>
+              </v-card-title>
 
-            <v-card-text>
-              <v-container>
-                <v-row>
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col
+                        cols="12"
+                        sm="12"
+                        md="12"
+                    >
+                        <v-text-field
+                            v-model="editedItem.name"
+                            label="Product name"
+                            counter
+                            :rules="[rules.required, rules.counter]"
+                        ></v-text-field>
+                    </v-col>
+                    <v-col
+                        cols="12"
+                        sm="12"
+                        md="12"
+                    >
+                      <v-select
+                          v-model="editedItem.categories"
+                          :items="states"
+                          item-text="name"
+                          label="Categories"
+                          multiple
+                          chips
+                          hint="select categories"
+                          persistent-hint
+                          return-object
+                      ></v-select>
+                    </v-col>
+                    <v-col
+                        cols="12"
+                        sm="12"
+                        md="12"
+                    >
+                      <v-textarea
+                          v-model="editedItem.description"
+                          label="Description"
+                      ></v-textarea>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card-text>
 
-                  <v-col
-                      cols="12"
-                      sm="12"
-                      md="12"
-                  >
-                    <v-text-field
-                        v-model="editedItem.name"
-                        label="Product name"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col
-                      cols="12"
-                      sm="12"
-                      md="12"
-                  >
-<!--                    <v-text-field-->
-<!--                    ></v-text-field>-->
-                    <v-select
-                        v-model="editedItem.categories"
-                        :items="states"
-                        item-text="name"
-                        label="Categories"
-                        multiple
-                        chips
-                        hint="select categories"
-                        persistent-hint
-                        return-object
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                      cols="12"
-                      sm="12"
-                      md="12"
-                  >
-                    <v-textarea
-                        v-model="editedItem.description"
-                        label="Description"
-                    ></v-textarea>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="close"
-              >
-                Cancel
-              </v-btn>
-              <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="save"
-              >
-                Save
-              </v-btn>
-            </v-card-actions>
-          </v-card>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                    color="blue darken-1"
+                    text
+                    @click="close"
+                >
+                  Cancel
+                </v-btn>
+                <v-btn
+                    color="blue darken-1"
+                    text
+                    @click="save"
+                >
+                  Save
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-form>
         </v-dialog>
-<!--      Delete dialog-->
+        <!--      Delete dialog-->
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
             <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
@@ -120,7 +125,7 @@
     <template v-slot:item.categories="props">
       <span v-for="category in props.item.categories">{{ category.name }} </span>
     </template>
-<!--    Actions in table-->
+    <!--    Actions in table-->
     <template v-slot:item.actions="{ item }">
       <v-icon
           small
@@ -136,7 +141,7 @@
         mdi-delete
       </v-icon>
     </template>
-<!--    Empty table-->
+    <!--    Empty table-->
     <template v-slot:no-data>
       <v-btn
           color="primary"
@@ -157,12 +162,13 @@ export default {
     url_categories: "http://localhost:8000/api/categories",
     dialog: false,
     dialogDelete: false,
+    valid: true,
     headers: [
       // { text: 'id', align: 'start', value: 'id',},
-      { text: 'Product Name', value: 'name' },
-      { text: 'Categories', value: 'categories'},
-      { text: 'Description', value: 'description' },
-      { text: 'Actions', value: 'actions', sortable: false },
+      {text: 'Product Name', value: 'name'},
+      {text: 'Categories', value: 'categories'},
+      {text: 'Description', value: 'description'},
+      {text: 'Actions', value: 'actions', sortable: false},
     ],
     products: [],
     editedIndex: -1,
@@ -182,58 +188,65 @@ export default {
       name: '',
     },
     states: [],
+    rules: {
+      required: value => !!value || 'Required.',
+      counter: value => value.length <= 255 || 'Max 255 characters',
+    }
   }),
 
   computed: {
-    formTitle () {
+    formTitle() {
       return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
     },
   },
 
   watch: {
-    dialog (val) {
+    dialog(val) {
       val || this.close()
     },
-    dialogDelete (val) {
+    dialogDelete(val) {
       val || this.closeDelete()
     },
   },
 
-  async created () {
+  async created() {
     const products_response = await axios.get(this.url_products)
     const categories_response = await axios.get(this.url_categories)
     // console.log(products_response, categories_response)
-    this.initialize(products_response.data,categories_response.data)
+    this.initialize(products_response.data, categories_response.data)
   },
 
   methods: {
-    initialize (data_products,data_categories) {
+    validate() {
+      return this.$refs.form.validate();
+    },
+    initialize(data_products, data_categories) {
       this.products = data_products;
       this.states = data_categories;
       // this.states = data_categories.flatMap(({ name }) => name );
       console.log(this.products, this.states)
     },
 
-    editItem (item) {
+    editItem(item) {
       this.editedIndex = this.products.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
 
-    deleteItem (item) {
+    deleteItem(item) {
 
       this.editedIndex = this.products.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogDelete = true
     },
 
-    deleteItemConfirm () {
-      const response = axios.delete(this.url_products+'/'+this.editedItem.id)
+    deleteItemConfirm() {
+      const response = axios.delete(this.url_products + '/' + this.editedItem.id)
       this.products.splice(this.editedIndex, 1)
       this.closeDelete()
     },
 
-    close () {
+    close() {
       this.dialog = false
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem)
@@ -241,7 +254,7 @@ export default {
       })
     },
 
-    closeDelete () {
+    closeDelete() {
       this.dialogDelete = false
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem)
@@ -250,19 +263,23 @@ export default {
     },
 
     async save() {
-      const requestData = {
-        name: this.editedItem.name,
-        categories: this.editedItem.categories.flatMap(({ id }) => id ),
-        description: this.editedItem.description
-      }
-      if (this.editedIndex > -1) {
-        const response = await axios.put(this.url_products + '/' + this.editedItem.id, requestData)
-        Object.assign(this.products[this.editedIndex], this.editedItem)
+      if (this.validate()) {
+        const requestData = {
+          name: this.editedItem.name,
+          categories: this.editedItem.categories.flatMap(({id}) => id),
+          description: this.editedItem.description
+        }
+        if (this.editedIndex > -1) {
+          const response = await axios.put(this.url_products + '/' + this.editedItem.id, requestData)
+          Object.assign(this.products[this.editedIndex], this.editedItem)
+        } else {
+          const response = await axios.post(this.url_products, requestData)
+          this.products.push(this.editedItem)
+        }
+        this.close()
       } else {
-        const response = await axios.post(this.url_products, requestData)
-        this.products.push(this.editedItem)
+        throw new Error("form isn't valid");
       }
-      this.close()
     },
   },
 }
