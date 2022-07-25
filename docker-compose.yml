@@ -17,7 +17,9 @@ services:
   back-end-app:
 #    image: 'bitnami/php-fpm:7.4'
     build:
-      context: ./symfony_crud_app
+      context: ./backend
+    environment:
+      DATABASE_URL: "mysql://root:toor@database:3306/vue_symfony_crud_db?serverVersion=5.7&charset=utf8mb4"
     container_name: back-end-app
     hostname: php-fpm
 #    volumes:
@@ -34,7 +36,7 @@ services:
       WEB_DOCUMENT_INDEX: index.php
       WEB_PHP_SOCKET: php-fpm:9000
     ports:
-      - "8001:80"
+      - "8000:80"
     volumes:
       - "./:/app"
     depends_on:
@@ -46,7 +48,7 @@ services:
 #    container_name: node-api
   front-end-app:
     build:
-      context: ./vue_crud_app
+      context: ./frontend
     ports:
       - "8081:8080"
     container_name: vue-ui
