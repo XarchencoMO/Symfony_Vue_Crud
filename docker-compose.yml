@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+  ###> doctrine/doctrine-bundle ###
+  database:
+    image: mysql
+    hostname: localhost
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: vue_symfony_crud_db
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: mysql
+      # TODO: What should we actually do with it?
+      MYSQL_ROOT_PASSWORD: toor
+    ports:
+      - "3307:3306"
+  back-end-app:
+#    image: 'bitnami/php-fpm:7.4'
+    build:
+      context: ./symfony_crud_app
+    container_name: back-end-app
+    hostname: php-fpm
+#    volumes:
+#      - "./:/app"
+#    working_dir: "/app"
+    depends_on:
+      - database
+  nginx:
+    image: webdevops/nginx
+    hostname: nginx
+    container_name: nginx
+    environment:
+      WEB_DOCUMENT_ROOT: /app/backend/public
+      WEB_DOCUMENT_INDEX: index.php
+      WEB_PHP_SOCKET: php-fpm:9000
+    ports:
+      - "8001:80"
+    volumes:
+      - "./:/app"
+    depends_on:
+      - back-end-app
+#  nodejs-server:
+#    image: node
+#    ports:
+#      - "3080:3080"
+#    container_name: node-api
+  front-end-app:
+    build:
+      context: ./vue_crud_app
+    ports:
+      - "8081:8080"
+    container_name: vue-ui
+#  back-end-app:
+#    build: ./symfony_crud_app
+
+#  database:
+
+      #    image: postgres:${POSTGRES_VERSION:-13}-alpine
+      #    environment:
+      #      POSTGRES_DB: ${POSTGRES_DB:-app}
+      #      # You should definitely change the password in production
+      #      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe}
+      #      POSTGRES_USER: ${POSTGRES_USER:-symfony}
+      #    volumes:
+      #      - db-data:/var/lib/postgresql/data:rw
+      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./docker/db/data:/var/lib/postgresql/data:rw
+###< doctrine/doctrine-bundle ###
+
+#volumes:
+###> doctrine/doctrine-bundle ###
+#  db-data:
+###< doctrine/doctrine-bundle ###
